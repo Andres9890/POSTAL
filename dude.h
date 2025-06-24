@@ -585,6 +585,7 @@ class CDude : public CCharacter
 		double		m_dLastCrawledToPosZ;			// Last position successfully crawled to.
 
 		bool			m_bInvincible;						// Dude does not loose health when invincible.
+                bool                    m_bInfiniteAmmo;                      // If true, ammo is never consumed.
 
 		// Tracks file counter so we know when to load/save "common" data 
 		static int16_t ms_sFileCount;

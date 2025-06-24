@@ -1635,8 +1635,32 @@ CDude::CDude(CRealm* pRealm)
 
 	m_bDead				= false;
 
-	m_bInvincible		= false;
+	m_bInvincible		= true;
+        m_bInfiniteAmmo           = true;
 
+        if (m_bInvincible)
+                {
+                CStockPile      stockpile       = { 0, };
+                stockpile.m_sHitPoints  = MAX(0, m_sOrigHitPoints - m_stockpile.m_sHitPoints);
+                stockpile.m_sNumGrenades                = CStockPile::ms_stockpileBackPackMax.m_sNumGrenades;
+                stockpile.m_sNumFireBombs               = CStockPile::ms_stockpileBackPackMax.m_sNumFireBombs;
+                stockpile.m_sNumMissiles                = CStockPile::ms_stockpileBackPackMax.m_sNumMissiles;
+                stockpile.m_sNumNapalms                 = CStockPile::ms_stockpileBackPackMax.m_sNumNapalms;
+                stockpile.m_sNumBullets                 = CStockPile::ms_stockpileBackPackMax.m_sNumBullets;
+                stockpile.m_sNumShells                  = CStockPile::ms_stockpileBackPackMax.m_sNumShells;
+                stockpile.m_sNumMines                   = CStockPile::ms_stockpileBackPackMax.m_sNumMines;
+                stockpile.m_sNumHeatseekers             = CStockPile::ms_stockpileBackPackMax.m_sNumHeatseekers;
+                stockpile.m_sNumFuel                    = CStockPile::ms_stockpileBackPackMax.m_sNumFuel;
+                stockpile.m_sMachineGun                 = 1;
+                stockpile.m_sMissileLauncher            = 1;
+                stockpile.m_sShotGun                    = 1;
+                stockpile.m_sSprayCannon                = 1;
+                stockpile.m_sFlameThrower               = 1;
+                stockpile.m_sNapalmLauncher             = 1;
+                stockpile.m_sKevlarLayers               = CStockPile::ms_stockpileMax.m_sKevlarLayers;
+                stockpile.m_sBackpack                   = 1;
+                CreateCheat(&stockpile);
+                }
 	// Base the dude number of the number of dude's in the realm.  Note that
 	// this number already includes this dude, so we subtract 1 from so the
 	// assigned dude numbers will start at 0.
@@ -2990,14 +3014,40 @@ if (!demoCompat)
 #endif
 			break;
 			}
-		case INPUT_CHEAT_30:	// Toggle invincibility.
-			{
-			UnlockAchievement(ACHIEVEMENT_ENABLE_CHEATS);
-			Flag_Achievements |= FLAG_USED_CHEATS;
+                case INPUT_CHEAT_30:    // Toggle god mode.
+                        {
+                        UnlockAchievement(ACHIEVEMENT_ENABLE_CHEATS);
+                        Flag_Achievements |= FLAG_USED_CHEATS;
 
-			m_bInvincible	= !m_bInvincible;
+                        m_bInvincible   = !m_bInvincible;
+                        m_bInfiniteAmmo = m_bInvincible;
 
-			break;
+                        if (m_bInvincible)
+                                {
+                                CStockPile      stockpile       = { 0, };
+                                stockpile.m_sHitPoints  = MAX(0, m_sOrigHitPoints - m_stockpile.m_sHitPoints);
+                                stockpile.m_sNumGrenades                = CStockPile::ms_stockpileBackPackMax.m_sNumGrenades;
+                                stockpile.m_sNumFireBombs               = CStockPile::ms_stockpileBackPackMax.m_sNumFireBombs;
+                                stockpile.m_sNumMissiles                = CStockPile::ms_stockpileBackPackMax.m_sNumMissiles;
+                                stockpile.m_sNumNapalms                 = CStockPile::ms_stockpileBackPackMax.m_sNumNapalms;
+                                stockpile.m_sNumBullets                 = CStockPile::ms_stockpileBackPackMax.m_sNumBullets;
+                                stockpile.m_sNumShells                  = CStockPile::ms_stockpileBackPackMax.m_sNumShells;
+                                stockpile.m_sNumMines                   = CStockPile::ms_stockpileBackPackMax.m_sNumMines;
+                                stockpile.m_sNumHeatseekers             = CStockPile::ms_stockpileBackPackMax.m_sNumHeatseekers;
+                                stockpile.m_sNumFuel                    = CStockPile::ms_stockpileBackPackMax.m_sNumFuel;
+                                stockpile.m_sMachineGun                 = 1;
+                                stockpile.m_sMissileLauncher            = 1;
+                                stockpile.m_sShotGun                    = 1;
+                                stockpile.m_sSprayCannon                = 1;
+                                stockpile.m_sFlameThrower               = 1;
+                                stockpile.m_sNapalmLauncher             = 1;
+                                stockpile.m_sKevlarLayers               = CStockPile::ms_stockpileMax.m_sKevlarLayers;
+                                stockpile.m_sBackpack                   = 1;
+                                CreateCheat(&stockpile);
+                                }
+
+                        break;
+                        }
 			}
 		}
 
@@ -4753,7 +4803,8 @@ CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 				if (m_stockpile.m_sNumShells > 1)
 					{
 					// Subtract one now (another will be taken soon -- cheezy... I know).
-					m_stockpile.m_sNumShells--;
+					if (!m_bInfiniteAmmo)
+                                                m_stockpile.m_sNumShells--;
 					}
 				else
 					{
@@ -4794,7 +4845,8 @@ CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 		if (bShootWeapon)
 			{
 			// Deduct ammo.
-			*psNumLeft	= *psNumLeft - 1;
+                        if (!m_bInfiniteAmmo)
+                                *psNumLeft      = *psNumLeft - 1;
 
 			pweapon	= CCharacter::ShootWeapon(bitsInclude, bitsDontcare, bitsExclude);
 
@@ -5316,7 +5368,8 @@ void CDude::OnExecute(void)		// Returns nothing.
 		// Note time of next fire.
 		m_lNextBulletTime	= m_pRealm->m_time.GetGameTime() + MS_BETWEEN_BULLETS;
 		// Deduct a shot.
-		*psNumLeft	= *psNumLeft - 1;
+                if (!m_bInfiniteAmmo)
+                        *psNumLeft      = *psNumLeft - 1;
 		}
 	else
 		{
