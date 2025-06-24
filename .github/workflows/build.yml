@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,10 +20,53 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: postal-build
+          name: linux-build
           path: bin/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install sdl2 sdl2_mixer
+      - name: Compile
+        run: |
+          make clean || true
+          make macosx_x86=1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: bin/
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Compile
+        run: msbuild Postal.sln /p:Configuration=Release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: '**\\*.exe'
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-linux
+      - build-macos
+      - build-windows
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          files: bin/*
+          files: dist/**/*
