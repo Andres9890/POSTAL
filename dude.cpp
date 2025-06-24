@@ -1178,7 +1178,7 @@ extern bool GetDudeFireAngle(double* d_Angle);
 #define MIN_CANNOT_BE_SHOT_DURATION	3000
 
 // Minimum duration between yells (for blown up and shot).
-#define MIN_BETWEEN_YELLS		(750 + (16 - g_GameSettings.m_sPainFrequency) * 125) // Current yell ('groan_male1.wav') is 640 ms.
+#define MIN_BETWEEN_YELLS		750 // Current yell ('groan_male1.wav') is 640 ms.
 
 // IDs for GUIs.
 #define GUI_ID_STOCKPILE		3
@@ -1635,32 +1635,8 @@ CDude::CDude(CRealm* pRealm)
 
 	m_bDead				= false;
 
-	m_bInvincible		= true;
-        m_bInfiniteAmmo           = true;
+	m_bInvincible		= false;
 
-        if (m_bInvincible)
-                {
-                CStockPile      stockpile       = { 0, };
-                stockpile.m_sHitPoints  = MAX(0, m_sOrigHitPoints - m_stockpile.m_sHitPoints);
-                stockpile.m_sNumGrenades                = CStockPile::ms_stockpileBackPackMax.m_sNumGrenades;
-                stockpile.m_sNumFireBombs               = CStockPile::ms_stockpileBackPackMax.m_sNumFireBombs;
-                stockpile.m_sNumMissiles                = CStockPile::ms_stockpileBackPackMax.m_sNumMissiles;
-                stockpile.m_sNumNapalms                 = CStockPile::ms_stockpileBackPackMax.m_sNumNapalms;
-                stockpile.m_sNumBullets                 = CStockPile::ms_stockpileBackPackMax.m_sNumBullets;
-                stockpile.m_sNumShells                  = CStockPile::ms_stockpileBackPackMax.m_sNumShells;
-                stockpile.m_sNumMines                   = CStockPile::ms_stockpileBackPackMax.m_sNumMines;
-                stockpile.m_sNumHeatseekers             = CStockPile::ms_stockpileBackPackMax.m_sNumHeatseekers;
-                stockpile.m_sNumFuel                    = CStockPile::ms_stockpileBackPackMax.m_sNumFuel;
-                stockpile.m_sMachineGun                 = 1;
-                stockpile.m_sMissileLauncher            = 1;
-                stockpile.m_sShotGun                    = 1;
-                stockpile.m_sSprayCannon                = 1;
-                stockpile.m_sFlameThrower               = 1;
-                stockpile.m_sNapalmLauncher             = 1;
-                stockpile.m_sKevlarLayers               = CStockPile::ms_stockpileMax.m_sKevlarLayers;
-                stockpile.m_sBackpack                   = 1;
-                CreateCheat(&stockpile);
-                }
 	// Base the dude number of the number of dude's in the realm.  Note that
 	// this number already includes this dude, so we subtract 1 from so the
 	// assigned dude numbers will start at 0.
@@ -3014,57 +2990,20 @@ if (!demoCompat)
 #endif
 			break;
 			}
-                case INPUT_CHEAT_30:    // Toggle god mode.
-                        {
-                        UnlockAchievement(ACHIEVEMENT_ENABLE_CHEATS);
-                        Flag_Achievements |= FLAG_USED_CHEATS;
+		case INPUT_CHEAT_30:	// Toggle invincibility.
+			{
+			UnlockAchievement(ACHIEVEMENT_ENABLE_CHEATS);
+			Flag_Achievements |= FLAG_USED_CHEATS;
 
-                        m_bInvincible   = !m_bInvincible;
-                        m_bInfiniteAmmo = m_bInvincible;
+			m_bInvincible	= !m_bInvincible;
 
-                        if (m_bInvincible)
-                                {
-                                CStockPile      stockpile       = { 0, };
-                                stockpile.m_sHitPoints  = MAX(0, m_sOrigHitPoints - m_stockpile.m_sHitPoints);
-                                stockpile.m_sNumGrenades                = CStockPile::ms_stockpileBackPackMax.m_sNumGrenades;
-                                stockpile.m_sNumFireBombs               = CStockPile::ms_stockpileBackPackMax.m_sNumFireBombs;
-                                stockpile.m_sNumMissiles                = CStockPile::ms_stockpileBackPackMax.m_sNumMissiles;
-                                stockpile.m_sNumNapalms                 = CStockPile::ms_stockpileBackPackMax.m_sNumNapalms;
-                                stockpile.m_sNumBullets                 = CStockPile::ms_stockpileBackPackMax.m_sNumBullets;
-                                stockpile.m_sNumShells                  = CStockPile::ms_stockpileBackPackMax.m_sNumShells;
-                                stockpile.m_sNumMines                   = CStockPile::ms_stockpileBackPackMax.m_sNumMines;
-                                stockpile.m_sNumHeatseekers             = CStockPile::ms_stockpileBackPackMax.m_sNumHeatseekers;
-                                stockpile.m_sNumFuel                    = CStockPile::ms_stockpileBackPackMax.m_sNumFuel;
-                                stockpile.m_sMachineGun                 = 1;
-                                stockpile.m_sMissileLauncher            = 1;
-                                stockpile.m_sShotGun                    = 1;
-                                stockpile.m_sSprayCannon                = 1;
-                                stockpile.m_sFlameThrower               = 1;
-                                stockpile.m_sNapalmLauncher             = 1;
-                                stockpile.m_sKevlarLayers               = CStockPile::ms_stockpileMax.m_sKevlarLayers;
-                                stockpile.m_sBackpack                   = 1;
-                                CreateCheat(&stockpile);
-                                }
-
-                        break;
-                        }
+			break;
 			}
 		}
 
 	// "Twinstick" style inputs.
 if (!demoCompat)
-{	
-	//New mouse implementation. 
-	if (g_InputSettings.m_sUseNewMouse && rspIsBackground() == FALSE) {
-
-		// Say we're using twinstick mode
-		m_bUseRotTS = true;
-
-		// Turn off the normal movement inputs if present
-		input &= ~(INPUT_FORWARD | INPUT_BACKWARD | INPUT_LEFT | INPUT_RIGHT);
-
-	}
-
+{
 	if ((input & INPUT_MOVE_UP) || (input & INPUT_MOVE_DOWN) || (input & INPUT_MOVE_LEFT) || (input & INPUT_MOVE_RIGHT)
 			|| (input & INPUT_FIRE_UP) || (input & INPUT_FIRE_DOWN) || (input & INPUT_FIRE_LEFT) || (input & INPUT_FIRE_RIGHT))
 	{
@@ -3106,7 +3045,6 @@ if (!demoCompat)
 		// Determine fire direction
 		if (bCanFire)
 		{
-			//Code for twinsticking on keyboard
 			if ((input & INPUT_FIRE_UP) || (input & INPUT_FIRE_DOWN) || (input & INPUT_FIRE_LEFT) || (input & INPUT_FIRE_RIGHT))
 			{
 				// Say we're firing our weapon
@@ -3121,11 +3059,10 @@ if (!demoCompat)
 					m_dRot = 180;
 				else if (input & INPUT_FIRE_RIGHT)
 					m_dRot = 0;
-			}//Keyboard twinstick wouldn't quite work with mouse in use
-			else if (g_InputSettings.m_sUseNewMouse == FALSE) {
-				//otherwise, point in the direction we're going
-				m_dRot = m_dRotTS;
 			}
+			else
+				// otherwise, point in the direction we're going
+				m_dRot = m_dRotTS;
 		}
 	}
 	//else
@@ -3140,7 +3077,6 @@ if (!demoCompat)
 
 	m_dJoyFireAngle = 0.f;
 	m_bJoyFire = (bCanFire && GetDudeFireAngle(&m_dJoyFireAngle));
-
 	if (m_dJoyMoveVel > 0 || m_bJoyFire)
 	{
 		// Setup movement
@@ -4803,8 +4739,7 @@ CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 				if (m_stockpile.m_sNumShells > 1)
 					{
 					// Subtract one now (another will be taken soon -- cheezy... I know).
-					if (!m_bInfiniteAmmo)
-                                                m_stockpile.m_sNumShells--;
+					m_stockpile.m_sNumShells--;
 					}
 				else
 					{
@@ -4845,8 +4780,7 @@ CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 		if (bShootWeapon)
 			{
 			// Deduct ammo.
-                        if (!m_bInfiniteAmmo)
-                                *psNumLeft      = *psNumLeft - 1;
+			*psNumLeft	= *psNumLeft - 1;
 
 			pweapon	= CCharacter::ShootWeapon(bitsInclude, bitsDontcare, bitsExclude);
 
@@ -5368,8 +5302,7 @@ void CDude::OnExecute(void)		// Returns nothing.
 		// Note time of next fire.
 		m_lNextBulletTime	= m_pRealm->m_time.GetGameTime() + MS_BETWEEN_BULLETS;
 		// Deduct a shot.
-                if (!m_bInfiniteAmmo)
-                        *psNumLeft      = *psNumLeft - 1;
+		*psNumLeft	= *psNumLeft - 1;
 		}
 	else
 		{
@@ -5494,43 +5427,25 @@ void CDude::Revive(				// Returns nothing.
 ////////////////////////////////////////////////////////////////////////////////
 void CDude::ShowTarget()
 {
-	//Old crossha
 	if (m_bTargetingHelpEnabled && m_bDead == false)
 	{
-		float fRateX = 0.0f;
-		float fRateZ = 0.0f;
+		// sAngle must be between 0 and 359.
+		int16_t sRotY = rspMod360((int16_t) m_dRot);
+		int16_t sRangeXZ = 100;
+		int16_t sRadius = 20;
 
-		if (g_InputSettings.m_sUseNewMouse && rspIsBackground() == FALSE) {
-		
-			fRateX = m_dMousePosX - m_dX;
-			fRateZ = m_dMousePosY - m_dZ;
+		float	fRateX = COSQ[sRotY] * sRangeXZ;
+		float	fRateZ = -SINQ[sRotY] * sRangeXZ;
+		float	fRateY = 0.0;	// If we ever want vertical movement . . .
 
-		}
-		else {
-
-			// sAngle must be between 0 and 359.
-			int16_t sRotY = rspMod360((int16_t)m_dRot);
-			int16_t sRangeXZ = 100;
-			//This is unused
-			//int16_t sRadius = 20;
-
-			fRateX = COSQ[sRotY] * sRangeXZ;
-			fRateZ = -SINQ[sRotY] * sRangeXZ;
-
-			//float	fRateY = 0.0;	// If we ever want vertical movement . . .
-
-			// Set initial position to first point to check (NEVER checks original position).
-			// !Unused
-			//float	fPosX = m_dX + fRateX;
-			//float	fPosY = m_dY + fRateY;
-			//float	fPosZ = m_dZ + fRateZ;
-
-		}
+		// Set initial position to first point to check (NEVER checks original position).
+		float	fPosX = m_dX + fRateX;
+		float	fPosY = m_dY + fRateY;
+		float	fPosZ = m_dZ + fRateZ;
 
 		if (m_TargetSprite.m_psprParent)
 			m_TargetSprite.m_psprParent->RemoveChild(&m_TargetSprite);
 		((CThing3d*)this)->m_sprite.AddChild(&m_TargetSprite);
-
 		// Map from 3d to 2d coords
 		Map3Dto2D(
 			fRateX - m_sprite.m_sRadius / 2,
@@ -5538,7 +5453,6 @@ void CDude::ShowTarget()
 			fRateZ,
 			&m_TargetSprite.m_sX2,
 			&m_TargetSprite.m_sY2);
-
 		m_TargetSprite.m_sInFlags &= ~CSprite::InHidden;
 		m_TargetSprite.m_sLayer = CRealm::LayerSprite16;
 	}
