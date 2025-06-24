@@ -366,7 +366,11 @@
 #include "flag.h"
 #include "gameedit.h"  //Needed for mapping functions
 
-// First shot at a dude, which is a player-controlled character
+/**
+			 * Represents a player-controlled character with animations, weapons, health, and state management.
+			 *
+			 * The CDude class encapsulates all logic and data for a controllable character, including animation handling, weapon inventory and usage, health and damage processing, input management, and interactions with the game world. It supports multiplayer features, power-up management, and various character states such as running, shooting, burning, and executing enemies.
+			 */
 class CDude : public CCharacter
 	{
 	//---------------------------------------------------------------------------

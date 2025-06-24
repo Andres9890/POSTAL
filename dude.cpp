@@ -1610,7 +1610,11 @@ void CDude::CDudeAnim3D::Release(void)	// Returns nothing.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constructor.
-////////////////////////////////////////////////////////////////////////////////
+/**
+	 * @brief Constructs a new player character with default state, stockpile, and cheat settings.
+	 *
+	 * Initializes the player character with default inventory, sets invincibility and infinite ammo to true, and grants a full stockpile of weapons, ammo, kevlar, and backpack if invincibility is enabled. Assigns a unique player number based on the current count in the realm.
+	 */
 CDude::CDude(CRealm* pRealm)
 	: CCharacter(pRealm, CDudeID)
 	{
@@ -2617,7 +2621,15 @@ void CDude::Update(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attempts user motivated state transitions.
-////////////////////////////////////////////////////////////////////////////////
+/**
+		 * @brief Processes player input to control movement, weapon selection, and cheat codes.
+		 *
+		 * Interprets user input based on the current state of the character, enabling or disabling movement and firing as appropriate. Handles weapon switching, cheat code activation (including toggling invincibility and infinite ammo), and special actions such as reviving or modifying the player's inventory. Outputs the maximum forward and backward velocities and the strafe angle determined by the input and state.
+		 *
+		 * @param pdMaxForeVel Pointer to receive the maximum forward velocity allowed by input and state.
+		 * @param pdMaxBackVel Pointer to receive the maximum backward velocity allowed by input and state.
+		 * @param psStrafeAngle Pointer to receive the strafe angle determined by input.
+		 */
 void CDude::ProcessInput(		// Returns nothing.
 	double*	pdMaxForeVel,		// Out: Maximum forward velocity.
 	double*	pdMaxBackVel,		// Out: Maximum backward velocity.
@@ -4753,7 +4765,16 @@ CWeapon* CDude::ShootWeapon(void)		// Returns the weapoin ptr or NULL.
 // This should be done when the character releases the weapon it's
 // shooting.
 // (virtual).
-////////////////////////////////////////////////////////////////////////////////
+/**
+	 * @brief Attempts to fire the currently armed weapon and returns the weapon instance if successful.
+	 *
+	 * Validates weapon position and checks ammo or weapon-specific conditions before firing. Deducts ammo only if infinite ammo is not enabled. Sets detection bits on the fired weapon as appropriate. Returns a pointer to the weapon instance if fired, or NULL if firing was not possible.
+	 *
+	 * @param bitsInclude Collision bits to include when firing.
+	 * @param bitsDontcare Collision bits to ignore.
+	 * @param bitsExclude Collision bits to exclude when firing.
+	 * @return CWeapon* Pointer to the fired weapon instance, or NULL if firing did not occur.
+	 */
 CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 	CSmash::Bits bitsInclude /*= ms_u32CollideBitsInclude*/,
 	CSmash::Bits bitsDontcare /*= ms_u32CollideBitsDontcare*/,
@@ -4868,7 +4889,14 @@ CWeapon* CDude::ShootWeapon(					// Returns the weapon ptr or NULL.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Receive damage.
-////////////////////////////////////////////////////////////////////////////////
+/**
+	 * @brief Applies damage to the dude unless invincibility is enabled.
+	 *
+	 * Reduces hit points by the specified amount and transitions to the dying state if health reaches zero. Registers a kill if the dude was not already dead. No damage is applied if invincibility is active.
+	 *
+	 * @param sHitPoints Amount of damage to apply.
+	 * @param u16ShooterId ID of the entity responsible for the damage.
+	 */
 void CDude::Damage(			// Returns nothing.
 	int16_t	sHitPoints,			// Hit points of damage to do.
 	U16	u16ShooterId)		// In:  Thing responsible for damage.
@@ -5329,7 +5357,11 @@ bool CDude::WhileBlownUp(void)	// Returns true until state is complete.
 
 ////////////////////////////////////////////////////////////////////////////////
 // Execute the nearest writhing guy, if any.
-////////////////////////////////////////////////////////////////////////////////
+/**
+	 * @brief Executes a semi-automatic shot at the current executee during an execution action.
+	 *
+	 * If the player has ammo, fires a shot at the targeted victim with muzzle flare and sound effects, sends a shot message, and deducts ammo unless infinite ammo is enabled. If out of ammo, plays an empty weapon sound.
+	 */
 void CDude::OnExecute(void)		// Returns nothing.
 	{
 	// Update execution point via link point.
