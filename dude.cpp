@@ -4876,7 +4876,7 @@ void CDude::Damage(			// Returns nothing.
 	// Remember if already dead . . .
 	bool	bDead	= m_bDead;
 
-	if (m_bInvincible == true)
+	if (m_bInvincible == false)
 		{
 		if (StatsAreAllowed) Stat_DamageTaken += sHitPoints;
 
