@@ -12,15 +12,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsdl2-dev libsdl2-mixer-dev
+          sudo apt-get install -y build-essential libsdl2-dev libsdl2-mixer-dev \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - name: Compile
         run: |
           make clean || true
-          make
+          make ARM64=1
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-build
+          name: linux-build-arm64
           path: bin/
 
 
@@ -35,7 +36,7 @@ jobs:
         run: |
           msbuild Postal.sln ^
             /p:Configuration=Release ^
-            /p:Platform=Win32 ^
+            /p:Platform=x64 ^
             /p:PlatformToolset=v143 ^
             /p:WindowsTargetPlatformVersion=10.0
       - name: Upload artifact

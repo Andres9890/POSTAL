@@ -27,6 +27,15 @@ else ifeq ($(ODROID),1)
   steamworks := false
   CFLAGS += -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard -ftree-vectorize -ffast-math -DODROID
   CLIENTEXE := $(BINDIR)/postal1-arm
+else ifeq ($(ARM64),1)
+  macosx := false
+  CPUARCH := arm64
+  CC := aarch64-linux-gnu-gcc
+  CXX := aarch64-linux-gnu-g++
+  LINKER := aarch64-linux-gnu-g++
+  steamworks := false
+  CFLAGS += -march=armv8-a
+  CLIENTEXE := $(BINDIR)/postal1-arm64
 else ifeq ($(linux_x86),1)
   target := linux_x86
   CFLAGS += -m32
@@ -54,6 +63,13 @@ ifeq ($(strip $(target)),linux_x86_64)
   CC ?= gcc
   CXX ?= g++
   LINKER ?= g++
+endif
+ifeq ($(strip $(target)),linux_arm64)
+  macosx := false
+  CPUARCH := arm64
+  CC ?= aarch64-linux-gnu-gcc
+  CXX ?= aarch64-linux-gnu-g++
+  LINKER ?= aarch64-linux-gnu-g++
 endif
 ifeq ($(strip $(target)),macosx_x86)
   macosx := true
@@ -309,15 +325,15 @@ ifeq ($(strip $(macosx)),true)
 else
   ifeq ($(CPUARCH),arm)
     LIBS += -lSDL2
+  else ifeq ($(CPUARCH),arm64)
+    LIBS += -lSDL2
+  else ifeq ($(CPUARCH),x86_64)
+    LIBS += -lSDL2
   else
-	ifeq ($(CPUARCH),x86_64)
-	  LIBS += -lSDL2
-	else
-	  LIBS += SDL2/libs/linux-x86/libSDL2-2.0.so.0
-	  LDFLAGS += -Wl,-rpath,\$$ORIGIN
-	  STEAMLDFLAGS += steamworks/sdk/redistributable_bin/linux32/libsteam_api.so
-	endif
- endif
+    LIBS += SDL2/libs/linux-x86/libSDL2-2.0.so.0
+    LDFLAGS += -Wl,-rpath,\$$ORIGIN
+    STEAMLDFLAGS += steamworks/sdk/redistributable_bin/linux32/libsteam_api.so
+  endif
 endif
 
 ifeq ($(strip $(steamworks)),true)
