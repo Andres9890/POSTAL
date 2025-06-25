@@ -23,23 +23,6 @@ jobs:
           name: linux-build
           path: bin/
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install sdl2 sdl2_mixer
-      - name: Compile
-        run: |
-          make clean || true
-          make macosx_x86=1
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-build
-          path: bin/
 
   build-windows:
     runs-on: windows-latest
@@ -48,7 +31,11 @@ jobs:
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v1.1
       - name: Compile
-        run: msbuild Postal.sln /p:Configuration=Release
+        run: msbuild Postal.sln ^
+              /p:Configuration=Release ^
+              /p:Platform=Win32 ^
+              /p:PlatformToolset=v143 ^
+              /p:WindowsTargetPlatformVersion=10.0
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -59,7 +46,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-linux
-      - build-macos
       - build-windows
     steps:
       - uses: actions/download-artifact@v4
