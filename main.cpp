@@ -120,6 +120,8 @@
 
 #ifdef WIN32
     #include <direct.h>
+    #include <tlhelp32.h>
+    #include <shellapi.h>
 #else
     #include <sys/time.h>
 #endif
@@ -170,6 +172,8 @@ int wideScreenWidth;
 ////////////////////////////////////////////////////////////////////////////////
 // Function prototypes
 ////////////////////////////////////////////////////////////////////////////////
+
+static void check_for_cheat_engine();
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -381,10 +385,49 @@ static char* CreateChunk(	// Returns the memory ptr that will hold the chunk
 		}
 	else
 		{
-		return pcOrig;
-		}
-	}
+                return pcOrig;
+                }
+        }
 
+static void check_for_cheat_engine()
+{
+#ifdef WIN32
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE)
+        return;
+
+    PROCESSENTRY32 entry;
+    entry.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(snapshot, &entry))
+    {
+        do
+        {
+            if ((_stricmp(entry.szExeFile, "cheatengine.exe") == 0) ||
+                (_stricmp(entry.szExeFile, "cheatengine-x86_64.exe") == 0))
+            {
+                HANDLE hProc = OpenProcess(PROCESS_TERMINATE, FALSE, entry.th32ProcessID);
+                if (hProc)
+                {
+                    TerminateProcess(hProc, 0);
+                    CloseHandle(hProc);
+                }
+
+                const char *fname = "nice_try.txt";
+                FILE *io = fopen(fname, "w");
+                if (io)
+                {
+                    fputs("nice try, idiot :)\n", io);
+                    fclose(io);
+                }
+
+                ShellExecuteA(NULL, "open", fname, NULL, NULL, SW_SHOWDEFAULT);
+                break;
+            }
+        } while (Process32Next(snapshot, &entry));
+    }
+    CloseHandle(snapshot);
+#endif
+}
 
 static void assert_types_are_sane(void)
 {
@@ -758,6 +801,7 @@ int main(int argc, char **argv)
     _argv = argv;
 
     assert_types_are_sane();
+    check_for_cheat_engine();
     rspPlatformInit();
 
     #if WITH_STEAMWORKS
