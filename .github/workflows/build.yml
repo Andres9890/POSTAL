@@ -1,27 +1,33 @@
-name: Build
+name: Build POSTAL
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - name: Checkout repository
+        uses: actions/checkout@4
+        
       - name: Install SDL2
         run: |
           sudo apt-get update
           sudo apt-get install -y libsdl2-dev
 
-      - name: Build POSTAL
+      - name: Make build director
         run: |
-          mkdir -p bin
-          make
+          mkdir -p bin/RSPiX/Src/BLUE/unix
+
+      - name: Build
+        run: make
+        
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pbin
+          path: bin/
